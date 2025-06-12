@@ -6,8 +6,8 @@ import DashboardOverview from '../components/DashboardOverview';
 import CourseFilters from '../components/CourseFilters';
 import CourseComparison from '../components/CourseComparison';
 import { CourseTable } from "@/components/CourseTable";
-import { 
-  BookOpen, 
+import {
+  BookOpen,
   Users,
   Star,
   Heart,
@@ -62,21 +62,21 @@ const API_CONFIG = {
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   // View state
   const [currentView, setCurrentView] = useState('dashboard');
-  
+
   // Data state
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  
+
   // Favorites and comparison states
   const [favorites, setFavorites] = useState([]);
   const [compareList, setCompareList] = useState([]);
@@ -91,7 +91,7 @@ const Index = () => {
   const fetchCourses = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await axios.get(API_CONFIG.BASE_URL, {
         timeout: API_CONFIG.TIMEOUT,
@@ -99,7 +99,7 @@ const Index = () => {
           'Content-Type': 'application/json',
         },
       });
-      
+
       // Transform API data to ensure consistent structure
       const transformedCourses = response.data.map(course => ({
         ...course,
@@ -127,24 +127,24 @@ const Index = () => {
         whatYouWillLearn: course.whatYouWillLearn || 'Learning outcomes not specified',
         points: course.points || '0',
       }));
-      
+
       setCourses(transformedCourses);
-      
+
       toast({
         title: "Courses loaded successfully",
         description: `Loaded ${transformedCourses.length} courses`,
       });
-      
+
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch courses';
       setError(errorMessage);
-      
+
       toast({
         title: "Error loading courses",
         description: errorMessage,
         variant: "destructive"
       });
-      
+
       console.error('Error fetching courses:', err);
     } finally {
       setLoading(false);
@@ -165,7 +165,7 @@ const Index = () => {
    */
   const filteredCourses = useMemo(() => {
     if (!courses.length) return [];
-    
+
     return courses.filter(course => {
       // Safe string operations with null checks
       const safeTitle = course.title || '';
@@ -173,15 +173,15 @@ const Index = () => {
       const safeDescription = course.description || '';
       const safeCategory = course.category || '';
       const safeDifficulty = course.difficulty || '';
-      
+
       const matchesSearch = safeTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          safeInstructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          safeDescription.toLowerCase().includes(searchQuery.toLowerCase());
-      
+        safeInstructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        safeDescription.toLowerCase().includes(searchQuery.toLowerCase());
+
       const matchesCategory = selectedCategory === 'All' || safeCategory === selectedCategory;
       const matchesDifficulty = selectedDifficulty === 'All' || safeDifficulty === selectedDifficulty;
       const matchesFavorites = !showFavoritesOnly || favorites.includes(course.id);
-      
+
       return matchesSearch && matchesCategory && matchesDifficulty && matchesFavorites;
     });
   }, [courses, searchQuery, selectedCategory, selectedDifficulty, showFavoritesOnly, favorites]);
@@ -199,14 +199,14 @@ const Index = () => {
       const newFavorites = prev.includes(courseId)
         ? prev.filter(id => id !== courseId)
         : [...prev, courseId];
-      
+
       toast({
         title: prev.includes(courseId) ? "Removed from favorites" : "Added to favorites",
         description: prev.includes(courseId)
           ? `${course.title} has been removed from your favorites`
           : `${course.title} has been added to your favorites`,
       });
-      
+
       return newFavorites;
     });
   };
@@ -250,7 +250,7 @@ const Index = () => {
    * @returns {string} CSS class for difficulty color
    */
   const getDifficultyColor = (difficulty) => {
-    switch(difficulty) {
+    switch (difficulty) {
       case 'Beginner': return 'bg-green-500';
       case 'Intermediate': return 'bg-orange-500';
       case 'Advanced': return 'bg-red-500';
@@ -380,7 +380,8 @@ const Index = () => {
                       className="w-full h-48 object-cover cursor-pointer"
                       onClick={() => navigate(`/course/${course.id}`)}
                       onError={(e) => {
-                        e.target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop';
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop';
                       }}
                     />
                     <div className="absolute top-4 left-4 flex gap-2">
@@ -410,7 +411,7 @@ const Index = () => {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-2">
                       <Badge className={getDifficultyColor(course.difficulty || 'Beginner')}>
@@ -419,16 +420,16 @@ const Index = () => {
                       <span className="text-gray-400 text-sm">{course.category || 'Uncategorized'}</span>
                     </div>
 
-                    <h3 
+                    <h3
                       className="font-semibold text-lg mb-2 text-white cursor-pointer hover:text-blue-400 transition-colors"
                       onClick={() => navigate(`/course/${course.id}`)}
                     >
                       {course.title || 'Untitled Course'}
                     </h3>
-                    
+
                     <p className="text-gray-400 text-sm mb-3">{course.instructor || 'Unknown Instructor'}</p>
                     <p className="text-gray-300 text-sm mb-4 line-clamp-2">{course.description || 'No description available'}</p>
-                    
+
                     <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
@@ -452,7 +453,7 @@ const Index = () => {
                         <span>{course.duration || 'Not specified'}</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         {course.originalPrice && course.originalPrice > 0 && (
@@ -460,7 +461,7 @@ const Index = () => {
                         )}
                         <span className="text-white font-bold text-lg">${course.price || 0}</span>
                       </div>
-                      <Button 
+                      <Button
                         size="sm"
                         onClick={() => navigate(`/course/${course.id}`)}
                       >
