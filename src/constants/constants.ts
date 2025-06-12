@@ -1,4 +1,4 @@
-  import { Home, BookOpen, Calendar, BarChart3,MessageCircle,Settings,Search,Bell} from 'lucide-react'; 
+  import { Home, BookOpen, Calendar, BarChart3,MessageCircle,Settings,Search,Bell, MessageSquare } from 'lucide-react'; 
 
   export const settingsSections = [
     { id: 'appearance', label: 'Appearance', color: 'bg-red-500' },
@@ -83,9 +83,9 @@
   { icon: Home, label: 'Overview', path: '/' },
   { icon: BookOpen, label: 'Courses', path: '/courses' },
   { icon: Calendar, label: 'Planning', path: '/planning' },
-  { icon: BarChart3, label: 'Statistics', path: '/statistics' }
+  { icon: BarChart3, label: 'Statistics', path: '/statistics' },
+{ icon: MessageSquare, label: 'Messages', path: '/messages' },
 ];
-
 
  export const activityData = [
   { month: '10 Oct', theory: 20, practice: 15 },
@@ -150,3 +150,84 @@ export const topTutors = [
   { name: "Anna Karlos", subject: "Programming", avatar: "🧑‍💻" },
   { name: "Karla May", subject: "Maths", avatar: "👩‍🏫" }
 ];
+
+ export const messages = [
+    {
+      id: 1,
+      sender: "Anna Karlos",
+      content: "Hi! How's your React project coming along?",
+      time: "10:30 AM",
+      isOwn: false
+    },
+    {
+      id: 2,
+      sender: "You",
+      content: "It's going well! I just finished implementing the routing system.",
+      time: "10:32 AM",
+      isOwn: true
+    },
+    {
+      id: 3,
+      sender: "Anna Karlos",
+      content: "Excellent! That's a crucial part of any React application. Have you considered adding error boundaries?",
+      time: "10:35 AM",
+      isOwn: false
+    },
+    {
+      id: 4,
+      sender: "You",
+      content: "Not yet, but that's a great suggestion. I'll look into implementing them next.",
+      time: "10:37 AM",
+      isOwn: true
+    },
+    {
+      id: 5,
+      sender: "Anna Karlos",
+      content: "Great progress on your React project! Keep it up.",
+      time: "10:40 AM",
+      isOwn: false
+    }
+  ];
+
+export const conversations = [
+    {
+      id: 1,
+      name: "Anna Karlos",
+      role: "Programming Instructor",
+      avatar: "🧑‍💻",
+      lastMessage: "Great progress on your React project! Keep it up.",
+      time: "2 min ago",
+      unread: 2,
+      online: true
+    },
+    {
+      id: 2,
+      name: "Karla May",
+      role: "Mathematics Tutor",
+      avatar: "👩‍🏫",
+      lastMessage: "The calculus assignment is due tomorrow",
+      time: "1 hour ago",
+      unread: 0,
+      online: true
+    },
+    {
+      id: 3,
+      name: "Study Group",
+      role: "Web Development",
+      avatar: "👥",
+      lastMessage: "Meeting scheduled for 3 PM today",
+      time: "3 hours ago",
+      unread: 5,
+      online: false
+    },
+    {
+      id: 4,
+      name: "Michael Chen",
+      role: "Design Instructor",
+      avatar: "🎨",
+      lastMessage: "Your UI design looks fantastic!",
+      time: "1 day ago",
+      unread: 0,
+      online: false
+    }
+  ];
