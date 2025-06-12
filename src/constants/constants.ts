@@ -79,12 +79,13 @@
       { label: 'Nov 10', value: 4000, color: 'bg-blue-400' }
     ];
 
-     export const sidebarItems = [
-    { icon: Home, label: 'Overview', path: '/' },
-    { icon: BookOpen, label: 'Courses', path: '/' },
-    { icon: Calendar, label: 'Planning', path: '/' },
-    { icon: BarChart3, label: 'Statistics', path: '/statistics' }
-  ];
+   export const sidebarItems = [
+  { icon: Home, label: 'Overview', path: '/' },
+  { icon: BookOpen, label: 'Courses', path: '/courses' },
+  { icon: Calendar, label: 'Planning', path: '/planning' },
+  { icon: BarChart3, label: 'Statistics', path: '/statistics' }
+];
+
 
  export const activityData = [
   { month: '10 Oct', theory: 20, practice: 15 },
