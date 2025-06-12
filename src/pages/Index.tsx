@@ -6,22 +6,10 @@ import DashboardOverview from '../components/DashboardOverview';
 import CourseFilters from '../components/CourseFilters';
 import CourseComparison from '../components/CourseComparison';
 import { CourseTable } from "@/components/CourseTable";
-import {
-  BookOpen,
-  Users,
-  Star,
-  Heart,
-  GitCompare,
-  Clock,
-  LayoutDashboard,
-  Loader2
-} from 'lucide-react';
+import { Users,Star,  Heart,BookOpen,  GitCompare,Clock, LayoutDashboard,Loader2} from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useToast } from '../hooks/use-toast';
-
-
-
 
 /**
  * Course interface definition based on API response structure

@@ -1,33 +1,33 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  BookOpen, 
-  Calendar, 
-  BarChart3, 
-  MessageCircle, 
-  Settings,
-  Search,
-  Bell
-} from 'lucide-react';
+import { sidebarItems } from '../constants/constants';
+import { MessageCircle, Settings, Search, Bell } from 'lucide-react';   
+
 import ThemeToggle from './ThemeToggle';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ * DashboardLayout is the main layout component for the dashboard.
+ * It includes the header, sidebar, and main content area.
+ *
+ * @component
+ * @param {DashboardLayoutProps} props - Props passed to the layout component.
+ * @param {React.ReactNode} props.children - The page content to render inside the layout.
+ * @returns {JSX.Element} The rendered dashboard layout.
+ */
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
 
-  const sidebarItems = [
-    { icon: Home, label: 'Overview', path: '/' },
-    { icon: BookOpen, label: 'Courses', path: '/' },
-    { icon: Calendar, label: 'Planning', path: '/' },
-    { icon: BarChart3, label: 'Statistics', path: '/statistics' }
-  ];
-
-  const isActive = (path: string) => {
+  /**
+   * Checks if the given path is currently active (matches the current location path).
+   *
+   * @param {string} path - The path to compare with the current location.
+   * @returns {boolean} True if the path is active, otherwise false.
+   */
+  const isActive = (path: string): boolean => {
     if (path === '/' && location.pathname === '/') return true;
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
@@ -38,6 +38,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Header */}
       <header className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
+          {/* Logo and Search */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -45,7 +46,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
               <span className="text-xl font-semibold">Omni.</span>
             </div>
-            
+
+            {/* Search Input */}
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <input
@@ -55,7 +57,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               />
             </div>
           </div>
-          
+
+          {/* Header Icons */}
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             <div className="relative">
@@ -92,6 +95,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             ))}
           </nav>
 
+          {/* Account Section */}
           <div className="mt-16">
             <div className="text-muted-foreground text-sm font-medium mb-4">Account</div>
             <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent">
@@ -112,6 +116,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </Link>
           </div>
 
+          {/* Invite Section */}
           <div className="mt-16">
             <div className="bg-muted rounded-lg p-4 text-center">
               <div className="text-4xl mb-2">📚</div>
