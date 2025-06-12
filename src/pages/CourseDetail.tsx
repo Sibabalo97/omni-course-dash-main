@@ -1,22 +1,212 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import DashboardLayout from '../components/DashboardLayout';
-import { mockCourses } from '../data/mockCourses';
 import { BookOpen, Users, Clock, Star, Heart, Share2, Play, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useToast } from '../hooks/use-toast';
 
+/**
+ * API Configuration
+ */
+const API_BASE_URL = 'https://api-generator.retool.com/JUg8eh/data';
+
+/**
+ * Course interface based on API response structure
+ * @typedef {Object} Course
+ * @property {number} id - Unique course identifier
+ * @property {string} title - Course title
+ * @property {string} price - Course price
+ * @property {string} originalPrice - Original price before discount
+ * @property {string} rating - Course rating
+ * @property {string} studentsEnrolled - Number of enrolled students
+ * @property {string} instructor - Instructor name
+ * @property {string} duration - Course duration
+ * @property {string} lessons - Number of lessons
+ * @property {string} difficulty - Course difficulty level
+ * @property {string} category - Course category
+ * @property {string} imageUrl - Course thumbnail image URL
+ * @property {string} description - Short course description
+ * @property {string} fullDescription - Detailed course description
+ * @property {string} skills - Comma-separated skills list
+ * @property {string} requirements - Course requirements
+ * @property {string} whatYouWillLearn - Learning outcomes
+ * @property {string} points - Course points
+ * @property {string} isNew - Flag indicating if course is new
+ * @property {string} isBestseller - Flag indicating if course is bestseller
+ */
+
+/**
+ * Fetches all courses from the API
+ * @returns {Promise<Course[]>} Promise that resolves to array of courses
+ */
+const fetchCourses = async () => {
+  try {
+    const response = await axios.get(API_BASE_URL);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    throw new Error('Failed to fetch courses');
+  }
+};
+
+/**
+ * Fetches a specific course by ID from the API
+ * @param {string|number} courseId - The course ID to fetch
+ * @returns {Promise<Course>} Promise that resolves to course object
+ */
+const fetchCourseById = async (courseId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${courseId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching course ${courseId}:`, error);
+    throw new Error(`Failed to fetch course with ID ${courseId}`);
+  }
+};
+
+/**
+ * Fetches related courses by category
+ * @param {string} category - Course category to filter by
+ * @param {number} excludeId - Course ID to exclude from results
+ * @param {number} limit - Maximum number of courses to return
+ * @returns {Promise<Course[]>} Promise that resolves to array of related courses
+ */
+const fetchRelatedCourses = async (category, excludeId, limit = 2) => {
+  try {
+    const response = await axios.get(API_BASE_URL);
+    const courses = response.data;
+    return courses
+      .filter(course => course.category === category && course.id !== excludeId)
+      .slice(0, limit);
+  } catch (error) {
+    console.error('Error fetching related courses:', error);
+    throw new Error('Failed to fetch related courses');
+  }
+};
+
+/**
+ * Utility function to parse comma-separated strings into arrays
+ * @param {string} str - Comma-separated string
+ * @returns {string[]} Array of trimmed strings
+ */
+const parseCommaSeparatedString = (str) => {
+  if (!str || typeof str !== 'string') return [];
+  return str.split(',').map(item => item.trim()).filter(item => item.length > 0);
+};
+
+/**
+ * Utility function to get difficulty badge color
+ * @param {string} difficulty - Course difficulty level
+ * @returns {string} Tailwind CSS color class
+ */
+const getDifficultyColor = (difficulty) => {
+  switch(difficulty?.toLowerCase()) {
+    case 'beginner': return 'bg-green-500';
+    case 'intermediate': return 'bg-orange-500';
+    case 'advanced': return 'bg-red-500';
+    default: return 'bg-gray-500';
+  }
+};
+
+/**
+ * CourseDetail Component
+ * Displays detailed information about a specific course
+ * @returns {JSX.Element} CourseDetail component
+ */
 const CourseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Component state
+  const [course, setCourse] = useState(null);
+  const [relatedCourses, setRelatedCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('about');
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const course = mockCourses.find(c => c.id === parseInt(id || '0'));
+  /**
+   * Load course data and related courses
+   */
+  useEffect(() => {
+    const loadCourseData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch main course data
+        const courseData = await fetchCourseById(id);
+        setCourse(courseData);
+        
+        // Fetch related courses
+        const related = await fetchRelatedCourses(courseData.category, parseInt(id));
+        setRelatedCourses(related);
+        
+      } catch (err) {
+        setError(err.message);
+        console.error('Failed to load course data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    if (id) {
+      loadCourseData();
+    }
+  }, [id]);
+
+  /**
+   * Handle adding/removing course from favorites
+   */
+  const handleAddToFavorites = () => {
+    setIsFavorite(!isFavorite);
+    toast({
+      title: isFavorite ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite 
+        ? `${course.title} has been removed from your favorites`
+        : `${course.title} has been added to your favorites`,
+    });
+  };
+
+  /**
+   * Handle navigation to related course
+   * @param {number} courseId - ID of the course to navigate to
+   */
+  const handleRelatedCourseClick = (courseId) => {
+    navigate(`/course/${courseId}`);
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading course details...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-red-400 mb-4">Error Loading Course</h1>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <Button onClick={() => navigate('/')}>Back to Courses</Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Course not found
   if (!course) {
     return (
       <DashboardLayout>
@@ -28,24 +218,10 @@ const CourseDetail = () => {
     );
   }
 
-  const handleAddToFavorites = () => {
-    setIsFavorite(!isFavorite);
-    toast({
-      title: isFavorite ? "Removed from favorites" : "Added to favorites",
-      description: isFavorite 
-        ? `${course.title} has been removed from your favorites`
-        : `${course.title} has been added to your favorites`,
-    });
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch(difficulty) {
-      case 'Beginner': return 'bg-green-500';
-      case 'Intermediate': return 'bg-orange-500';
-      case 'Advanced': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
-  };
+  // Parse course data
+  const skillsArray = parseCommaSeparatedString(course.skills);
+  const requirementsArray = parseCommaSeparatedString(course.requirements);
+  const learningOutcomes = parseCommaSeparatedString(course.whatYouWillLearn);
 
   return (
     <DashboardLayout>
@@ -110,7 +286,7 @@ const CourseDetail = () => {
                   
                   <h4 className="text-lg font-semibold mb-3">What you'll learn</h4>
                   <ul className="space-y-2 mb-6">
-                    {course.whatYouWillLearn.map((item, index) => (
+                    {learningOutcomes.map((item, index) => (
                       <li key={index} className="flex items-start space-x-2">
                         <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
                         <span className="text-gray-300">{item}</span>
@@ -120,7 +296,7 @@ const CourseDetail = () => {
 
                   <h4 className="text-lg font-semibold mb-3">Requirements</h4>
                   <ul className="space-y-2">
-                    {course.requirements.map((req, index) => (
+                    {requirementsArray.map((req, index) => (
                       <li key={index} className="text-gray-300">• {req}</li>
                     ))}
                   </ul>
@@ -134,7 +310,7 @@ const CourseDetail = () => {
                     <div>
                       <h4 className="font-semibold mb-2">Skills you'll gain</h4>
                       <div className="flex flex-wrap gap-2">
-                        {course.skills.map((skill, index) => (
+                        {skillsArray.map((skill, index) => (
                           <Badge key={index} variant="secondary">{skill}</Badge>
                         ))}
                       </div>
@@ -161,7 +337,7 @@ const CourseDetail = () => {
                       <span className="text-2xl font-bold">{course.rating}</span>
                     </div>
                     <span className="text-gray-400">
-                      ({course.studentsEnrolled.toLocaleString()} students)
+                      ({parseInt(course.studentsEnrolled).toLocaleString()} students)
                     </span>
                   </div>
                   <p className="text-gray-400">Reviews feature coming soon...</p>
@@ -194,7 +370,7 @@ const CourseDetail = () => {
                   </div>
                   <div className="flex items-center space-x-1">
                     <Users className="w-4 h-4" />
-                    <span>{course.studentsEnrolled.toLocaleString()}</span>
+                    <span>{parseInt(course.studentsEnrolled).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -245,17 +421,15 @@ const CourseDetail = () => {
             </div>
 
             {/* Related Courses */}
-            <div className="bg-gray-800 rounded-xl p-6 mt-6">
-              <h3 className="text-lg font-semibold mb-4">Students Also Bought</h3>
-              <div className="space-y-4">
-                {mockCourses
-                  .filter(c => c.id !== course.id && c.category === course.category)
-                  .slice(0, 2)
-                  .map((relatedCourse) => (
+            {relatedCourses.length > 0 && (
+              <div className="bg-gray-800 rounded-xl p-6 mt-6">
+                <h3 className="text-lg font-semibold mb-4">Students Also Bought</h3>
+                <div className="space-y-4">
+                  {relatedCourses.map((relatedCourse) => (
                     <div 
                       key={relatedCourse.id}
                       className="flex space-x-3 cursor-pointer hover:bg-gray-700 p-2 rounded-lg transition-colors"
-                      onClick={() => navigate(`/course/${relatedCourse.id}`)}
+                      onClick={() => handleRelatedCourseClick(relatedCourse.id)}
                     >
                       <img 
                         src={relatedCourse.imageUrl}
@@ -275,8 +449,9 @@ const CourseDetail = () => {
                       </div>
                     </div>
                   ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
