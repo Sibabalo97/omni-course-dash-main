@@ -10,7 +10,8 @@ import { useToast } from '../hooks/use-toast';
 /**
  * API Configuration
  */
-const API_BASE_URL = 'https://api-generator.retool.com/JUg8eh/data';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+console.log("data from api", API_BASE_URL);
 
 /**
  * Course interface based on API response structure

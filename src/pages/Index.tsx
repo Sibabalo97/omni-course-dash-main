@@ -20,6 +20,9 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useToast } from '../hooks/use-toast';
 
+
+
+
 /**
  * Course interface definition based on API response structure
  * @typedef {Object} Course
@@ -49,9 +52,10 @@ import { useToast } from '../hooks/use-toast';
  * API configuration constants
  */
 const API_CONFIG = {
-  BASE_URL: 'https://api-generator.retool.com/JUg8eh/data',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL,
   TIMEOUT: 10000,
 };
+
 
 /**
  * Main Index component for the course dashboard
@@ -493,7 +497,12 @@ const Index = () => {
             {/* Course Listing Table */}
             {filteredCourses.length > 0 && (
               <div className="mt-12">
-                <h2 className="text-2xl font-bold mb-6">Course Listing</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Course Listing</h2>
+                  <div className="text-gray-400">
+                    Showing {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'}
+                  </div>
+                </div>
                 <CourseTable courses={filteredCourses} />
               </div>
             )}

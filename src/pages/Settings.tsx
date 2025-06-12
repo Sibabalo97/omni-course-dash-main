@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
+import {settingsSections} from '../constants/constants'
 
 export default function Settings() {
   const [activeSection, setActiveSection] = useState('Personal information');
@@ -12,14 +13,6 @@ export default function Settings() {
     about: ''
   });
 
-  const settingsSections = [
-    { id: 'appearance', label: 'Appearance', color: 'bg-red-500' },
-    { id: 'personal', label: 'Personal information', color: 'bg-blue-500' },
-    { id: 'security', label: 'Security', color: 'bg-red-500' },
-    { id: 'billing', label: 'Billing information', color: 'bg-cyan-500' },
-    { id: 'messages', label: 'Messages', color: 'bg-blue-500' },
-    { id: 'data', label: 'Data export', color: 'bg-blue-500' }
-  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
