@@ -1,21 +1,59 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import {settingsSections} from '../constants/constants'
+import { settingsSections } from '../constants/constants';
+
+interface FormData {
+  email: string;
+  phone: string;
+  country: string;
+  language: string;
+  about: string;
+}
+
+const LOCAL_STORAGE_KEY = 'user_settings';
 
 export default function Settings() {
   const [activeSection, setActiveSection] = useState('Personal information');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: '',
     phone: '',
     country: '',
     language: '',
-    about: ''
+    about: '',
   });
 
+  /**
+   * Loads saved settings from localStorage when component mounts.
+   */
+  useEffect(() => {
+    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedData) {
+      setFormData(JSON.parse(storedData));
+    }
+  }, []);
 
+  /**
+   * Handles input changes by updating the form state.
+   * @param {string} field - The name of the form field to update.
+   * @param {string} value - The new value to set.
+   */
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  /**
+   * Saves the current form data to localStorage.
+   */
+  const saveSettingsToLocalStorage = () => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formData));
+  };
+
+  /**
+   * Handler for the "Save" button click.
+   */
+  const handleSave = () => {
+    saveSettingsToLocalStorage();
+    alert('Settings saved successfully!');
   };
 
   return (
@@ -24,7 +62,7 @@ export default function Settings() {
         {/* Settings Sidebar */}
         <div className="w-80 pr-8">
           <h1 className="text-3xl font-bold mb-8">Settings</h1>
-          
+
           <div className="space-y-2">
             {settingsSections.map((section) => (
               <button
@@ -88,7 +126,7 @@ export default function Settings() {
               <p className="text-gray-400 mb-4">
                 This information will be displayed publicly so be careful what you share.
               </p>
-              
+
               <div className="bg-gray-800 rounded-lg p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -103,7 +141,7 @@ export default function Settings() {
                       onChange={(e) => handleInputChange('email', e.target.value)}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-gray-300 text-sm font-medium mb-2">
                       Phone number
@@ -137,7 +175,7 @@ export default function Settings() {
                       <option value="FR">France</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-gray-300 text-sm font-medium mb-2">
                       Language
@@ -165,7 +203,10 @@ export default function Settings() {
               <button className="px-6 py-2 text-gray-400 hover:text-white transition-colors">
                 Cancel
               </button>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <button
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={handleSave}
+              >
                 Save
               </button>
             </div>
