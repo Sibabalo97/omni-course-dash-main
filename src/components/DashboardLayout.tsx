@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { sidebarItems } from '../constants/constants';
-import { MessageCircle, Settings, Search, Bell } from 'lucide-react';   
+import { MessageCircle, Settings, Search, Bell } from 'lucide-react';
 
 import ThemeToggle from './ThemeToggle';
 
@@ -28,9 +28,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
    * @returns {boolean} True if the path is active, otherwise false.
    */
   const isActive = (path: string): boolean => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
-    return false;
+    if (path === '/') {
+      // Active if it's exactly "/" (Overview) or starts with "/course" (Courses)
+      return location.pathname === '/' || location.pathname.startsWith('/course');
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
@@ -81,13 +83,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="text-muted-foreground text-sm font-medium mb-4">Menu</div>
             {sidebarItems.map((item) => (
               <Link
-                key={item.path}
+                key={item.key}
                 to={item.path}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.path)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                }`}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive(item.path)
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
               >
                 <item.icon className="w-5 h-5" />
                 <span>{item.label}</span>
@@ -98,18 +99,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Account Section */}
           <div className="mt-16">
             <div className="text-muted-foreground text-sm font-medium mb-4">Account</div>
-            <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent">
+
+            <Link
+              to="/messages"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent"
+            >
               <MessageCircle className="w-5 h-5" />
               <span>Messages</span>
               <span className="ml-auto bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full">5</span>
-            </button>
+            </Link>
+
             <Link
               to="/settings"
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                location.pathname === '/settings'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-              }`}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === '/settings'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                }`}
             >
               <Settings className="w-5 h-5" />
               <span>Settings</span>
