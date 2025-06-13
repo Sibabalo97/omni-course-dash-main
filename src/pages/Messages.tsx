@@ -1,24 +1,139 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import DashboardLayout from '../components/DashboardLayout';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { MessageCircle, Search, Send, Phone, Video, MoreVertical } from 'lucide-react';
-import {messages, conversations} from '../constants/constants'
+
+/**
+ * Represents a conversation in the messaging app
+ * @typedef {Object} Conversation
+ * @property {number} id - Unique identifier for the conversation
+ * @property {string} name - Name of the contact
+ * @property {string} role - Role or description of the contact
+ * @property {string} avatar - Avatar representation
+ * @property {boolean} online - Online status
+ * @property {string} lastMessage - Last message in the conversation
+ * @property {string} time - Time of last activity
+ * @property {number} unread - Number of unread messages
+ */
+
+/**
+ * Represents a message in a conversation
+ * @typedef {Object} Message
+ * @property {number} id - Unique identifier for the message
+ * @property {string} content - Text content of the message
+ * @property {string} time - Time when message was sent
+ * @property {boolean} isOwn - Whether the message is from the current user
+ * @property {number} conversationId - ID of the conversation this message belongs to
+ */
 
 const Messages = () => {
-  const [selectedConversation, setSelectedConversation] = useState(1);
+  const [selectedConversation, setSelectedConversation] = useState(null);
   const [newMessage, setNewMessage] = useState('');
+  const [conversations, setConversations] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch conversations and initial messages
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch conversations
+        const convResponse = await axios.get('https://retoolapi.dev/uStaHs/data');
+        setConversations(convResponse.data);
+        
+        // Fetch messages for the first conversation by default
+        if (convResponse.data.length > 0) {
+          const firstConversationId = convResponse.data[0].id;
+          setSelectedConversation(firstConversationId);
+          const msgResponse = await axios.get(`https://retoolapi.dev/o7Ui5F/data?conversationId=${firstConversationId}`);
+          setMessages(msgResponse.data);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Fetch messages when conversation changes
+  useEffect(() => {
+    if (selectedConversation) {
+      const fetchMessages = async () => {
+        try {
+          const response = await axios.get(`https://retoolapi.dev/o7Ui5F/data?conversationId=${selectedConversation}`);
+          setMessages(response.data);
+        } catch (err) {
+          setError(err.message);
+        }
+      };
+      
+      fetchMessages();
+    }
+  }, [selectedConversation]);
+
+  /**
+   * Handles sending a new message
+   */
+  const handleSendMessage = async () => {
+    if (newMessage.trim() && selectedConversation) {
+      try {
+        // Create new message object
+        const newMsg = {
+          content: newMessage,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isOwn: true,
+          conversationId: selectedConversation
+        };
+        
+        // Optimistically update UI
+        setMessages([...messages, newMsg]);
+        setNewMessage('');
+        
+        // Post to API
+        await axios.post('https://retoolapi.dev/o7Ui5F/data', newMsg);
+        
+        // Refresh messages to get the actual ID from server
+        const response = await axios.get(`https://retoolapi.dev/o7Ui5F/data?conversationId=${selectedConversation}`);
+        setMessages(response.data);
+      } catch (err) {
+        setError('Failed to send message');
+        // Rollback optimistic update
+        setMessages(messages.filter(msg => msg.id !== undefined)); // Remove the temporary message
+      }
+    }
+  };
 
   const selectedContact = conversations.find(c => c.id === selectedConversation);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      setNewMessage('');
-    }
-  };
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+          <p>Loading messages...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+          <p className="text-red-500">Error: {error}</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -113,7 +228,7 @@ const Messages = () => {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {messages.map((message) => (
                     <div
-                      key={message.id}
+                      key={message.id || Math.random()} 
                       className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
