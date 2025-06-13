@@ -21,7 +21,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+       <BrowserRouter basename="/omni-course-dash-main">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/course/:id" element={<CourseDetail />} />
